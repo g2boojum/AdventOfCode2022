@@ -29,10 +29,12 @@ with open('day7.txt') as fp:
 
 
 def build_tree(lines):
-    rt = {'name':'/', 'parent':None, 'files':[], 'dirs':{}}
-    cwd = rt
+    cwd = {}
+    rt = {'name': '/', 'parent': None, 'files': [], 'dirs': {}}
     for line in lines:
-        if '..' in line:
+        if 'cd /' in line:
+            cwd = rt
+        elif '..' in line:
             cwd = cwd['parent']
         elif 'cd' in line:
             dirname = line.split()[-1]
@@ -41,7 +43,8 @@ def build_tree(lines):
             continue
         elif 'dir' in line:
             dirname = line.split()[-1]
-            cwd['dirs'][dirname] = {'name':dirname, 'parent':cwd, 'files':[],
+            cwd['dirs'][dirname] = {'name': dirname, 'parent': cwd,
+                                    'files': [],
                                     'dirs': {}}
         else:
             # must be a file
@@ -49,8 +52,7 @@ def build_tree(lines):
             cwd['files'].append((int(size), name))
     return rt
 
+
 if __name__ == '__main__':
     tree = build_tree(testlines)
     print(tree)
-
-
