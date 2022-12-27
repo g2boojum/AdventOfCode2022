@@ -68,10 +68,10 @@ def add_size(cwd):
 
 
 def walk_tree(cwd, lim):
-    print('Entered ', cwd['name'])
     for dirname in cwd['dirs']:
         d = cwd['dirs'][dirname]
-        walk_tree(d, lim)
+        for size in walk_tree(d, lim):
+            yield size
     if cwd['total'] <= lim:
         yield cwd['total']
 
@@ -84,3 +84,33 @@ if __name__ == '__main__':
     datatree = build_tree(data)
     add_size(datatree)
     print('Data size = ', datatree['total'])
+    print('Data part 1 = ', sum(walk_tree(datatree, 100000)))
+
+
+def walk_tree_sizes(cwd):
+    for dirname in cwd['dirs']:
+        d = cwd['dirs'][dirname]
+        for size in walk_tree_sizes(d):
+            yield size
+    yield cwd['total']
+
+
+def part2(lines):
+    tree = build_tree(lines)
+    add_size(tree)
+    used = tree['total']
+    fs_size = 70000000
+    required = 30000000
+    unused = fs_size - used
+    additional = required - unused
+    dirsizes = sorted(walk_tree_sizes(tree))
+    for sz in dirsizes:
+        if sz > additional:
+            minsz = sz
+            break
+    return sz
+
+
+if __name__ == '__main__':
+    print('Test smallest dir size to be deleted: ', part2(testlines))
+    print('Data smallest dir size to be deleted: ', part2(data))
