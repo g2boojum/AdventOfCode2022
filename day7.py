@@ -1,5 +1,7 @@
 # day7.py
 
+import pprint
+
 testlines = '''$ cd /
 $ ls
 dir a
@@ -32,16 +34,16 @@ def build_tree(lines):
     cwd = {}
     rt = {'name': '/', 'parent': None, 'files': [], 'dirs': {}}
     for line in lines:
-        if 'cd /' in line:
+        if '$ cd /' in line:
             cwd = rt
-        elif '..' in line:
+        elif '$ cd ..' in line:
             cwd = cwd['parent']
-        elif 'cd' in line:
+        elif '$ cd' in line:
             dirname = line.split()[-1]
             cwd = cwd['dirs'][dirname]
-        elif 'ls' in line:
+        elif '$ ls' in line:
             continue
-        elif 'dir' in line:
+        elif 'dir' == line[:3]:
             dirname = line.split()[-1]
             cwd['dirs'][dirname] = {'name': dirname, 'parent': cwd,
                                     'files': [],
@@ -53,6 +55,32 @@ def build_tree(lines):
     return rt
 
 
+def add_size(cwd):
+    total = 0
+    for size, _ in cwd['files']:
+        total += size
+    for dirname in cwd['dirs']:
+        d = cwd['dirs'][dirname]
+        if 'total' not in d:
+            add_size(d)
+        total += d['total']
+    cwd['total'] = total
+
+
+def walk_tree(cwd, lim):
+    print('Entered ', cwd['name'])
+    for dirname in cwd['dirs']:
+        d = cwd['dirs'][dirname]
+        walk_tree(d, lim)
+    if cwd['total'] <= lim:
+        yield cwd['total']
+
+
 if __name__ == '__main__':
     tree = build_tree(testlines)
-    print(tree)
+    add_size(tree)
+    print('Test size = ', tree['total'])
+    print('Test part 1 = ', sum(walk_tree(tree, 100000)))
+    datatree = build_tree(data)
+    add_size(datatree)
+    print('Data size = ', datatree['total'])
