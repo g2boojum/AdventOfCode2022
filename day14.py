@@ -67,11 +67,64 @@ def fall(pts, bottom):
     return has_escaped, (x,y)
 
 
+def part1(lines):
+    rockpts = parse(lines)
+    bottom = bounds(rockpts)[-1]
+    numsand = 0
+    while True:
+        numsand += 1
+        has_escaped, pos = fall(rockpts, bottom)
+        if has_escaped:
+            break
+        rockpts.add(pos)
+    return numsand - 1
+
+
 if __name__ == '__main__':
     testrockpts = parse(testlines)
     plot_pts(testrockpts, 'testrocks.svg')
-    print(bounds(testrockpts))
+    print('Part 1')
+    print('Test: ', part1(testlines))
     datarockpts = parse(data)
     plot_pts(datarockpts, 'datarocks.svg')
+    print('Data: ', part1(data))
 
 
+def fall2(pts, bottom):
+    floor = bottom + 2
+    x,y = start
+    while y < floor-1:
+        if (x, y+1) not in pts:
+            y = y + 1
+        elif (x-1, y+1) not in pts:
+            x = x - 1
+            y = y + 1
+        elif (x+1, y+1) not in pts:
+            x = x + 1
+            y = y + 1
+        else:
+            # sand has come to rest here
+            return (x,y)
+    # sand is sitting on the floor
+    return (x,y)
+
+
+def part2(lines):
+    rockpts = parse(lines)
+    bottom = bounds(rockpts)[-1]
+    numsand = 0
+    while True:
+        numsand += 1
+        pos = fall2(rockpts, bottom)
+        if pos == start:
+            break
+        rockpts.add(pos)
+        if numsand > 1000000:
+            raise ValueError('Too many interations!')
+    return numsand 
+
+
+if __name__ == '__main__':
+    print('Part 2')
+    print('Test: ', part2(testlines))
+    print('Data: ', part2(data))
